@@ -1,0 +1,31 @@
+// Prisma schema for movie chat app
+// Use PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Conversation {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  messages  Message[]
+}
+
+model Message {
+  id             String        @id @default(uuid())
+  createdAt      DateTime      @default(now())
+  role           MessageRole   // 'user' or 'agent'
+  content        String
+  conversation   Conversation  @relation(fields: [conversationId], references: [id])
+  conversationId String
+}
+
+enum MessageRole {
+  user
+  agent
+}
