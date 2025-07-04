@@ -48,9 +48,12 @@ export const UserPrompt = ({
             <MicIcon size={16} />
           </AIInputButton> */}
         </AIInputTools>
-        <AIInputSubmit status={status} disabled={!text}>
-          <SendIcon size={16} />
-        </AIInputSubmit>
+        <div className="text-xs text-muted-foreground flex items-center gap-2">
+          Shift+Enter{" "}
+          <AIInputSubmit status={status} disabled={!text}>
+            <SendIcon size={16} />
+          </AIInputSubmit>
+        </div>
       </AIInputToolbar>
     </AIInput>
   );
