@@ -1,3 +1,9 @@
+# 🚀 [Live Demo](https://test-pers-ui7w.vercel.app/)
+
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Click%20Here-brightgreen?style=for-the-badge)](https://test-pers-ui7w.vercel.app/)
+
+> Try the app here: [https://test-pers-ui7w.vercel.app/](https://test-pers-ui7w.vercel.app/)
+
 # 🎬 Movie Chat Application
 
 This is a [Next.js](https://nextjs.org) movie recommendation chat application that uses AI to help users discover movies based on their preferences.
