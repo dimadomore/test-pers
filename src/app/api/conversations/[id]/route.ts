@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+// @ts-expect-error Next.js does not provide a type for context
 export async function GET(request: NextRequest, context) {
   try {
     const { id } = context.params;
