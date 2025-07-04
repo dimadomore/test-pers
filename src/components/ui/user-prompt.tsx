@@ -6,11 +6,15 @@ import {
   AIInputTextarea,
   AIInputToolbar,
   AIInputTools,
-} from "@/components/ui/kibo-ui/ai/input";
+} from "@/components/ui/kibo-ui/input";
 import { MicIcon, SendIcon } from "lucide-react";
 import { type FormEventHandler, useState } from "react";
 
-export const UserPrompt = () => {
+export const UserPrompt = ({
+  onSubmit,
+}: {
+  onSubmit: (text: string) => void;
+}) => {
   const [text, setText] = useState<string>("");
   const [status, setStatus] = useState<
     "submitted" | "streaming" | "ready" | "error"
@@ -21,6 +25,8 @@ export const UserPrompt = () => {
     if (!text) {
       return;
     }
+    onSubmit(text);
+    setText("");
     setStatus("submitted");
     setTimeout(() => {
       setStatus("streaming");
