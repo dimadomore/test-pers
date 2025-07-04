@@ -3,12 +3,9 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, context) {
   try {
-    const { id } = params;
+    const { id } = context.params;
 
     const conversation = await prisma.conversation.findUnique({
       where: { id },

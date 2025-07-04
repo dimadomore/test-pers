@@ -1,13 +1,12 @@
 "use client";
 import {
   AIInput,
-  AIInputButton,
   AIInputSubmit,
   AIInputTextarea,
   AIInputToolbar,
   AIInputTools,
 } from "@/components/ui/kibo-ui/input";
-import { MicIcon, SendIcon } from "lucide-react";
+import { SendIcon } from "lucide-react";
 import { type FormEventHandler, useState } from "react";
 
 export const UserPrompt = ({
