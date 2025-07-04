@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { useRouter, useParams } from "next/navigation";
 import { SidebarContent } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,36 +14,96 @@ interface Conversation {
   id: string;
   title: string;
   createdAt: string;
+  messageCount: number;
 }
 
-// Placeholder data for now
-const mockConversations: Conversation[] = [
-  {
-    id: "1",
-    title: "Movie recommendations",
-    createdAt: "2024-07-03T12:00:00Z",
-  },
-  {
-    id: "2",
-    title: "Oscar winners",
-    createdAt: "2024-07-02T15:30:00Z",
-  },
-];
+interface ConversationsResponse {
+  conversations: Conversation[];
+}
 
 export const History = React.memo(function History() {
-  // In a real app, fetch conversations from API or context
-  const [conversations] = React.useState<Conversation[]>(mockConversations);
+  const router = useRouter();
+  const params = useParams();
+  const currentConversationId = params.conversationId as string;
 
-  const handleNewChat = React.useCallback(() => {
-    // TODO: Implement new chat creation logic
-    // For now, just log
-    // In a real app, this would create a new conversation and navigate to it
-    // setConversations([...conversations, ...])
-    // router.push(`/chat/${newId}`)
-    // etc.
-    // eslint-disable-next-line no-console
-    console.log("New chat");
+  const [conversations, setConversations] = React.useState<Conversation[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  // Load conversations on mount
+  React.useEffect(() => {
+    const loadConversations = async () => {
+      try {
+        const response = await fetch("/api/conversations", {
+          method: "GET",
+        });
+
+        if (response.ok) {
+          const data: ConversationsResponse = await response.json();
+          setConversations(data.conversations || []);
+        } else {
+          console.error("Failed to fetch conversations");
+        }
+      } catch (error) {
+        console.error("Error loading conversations:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadConversations();
   }, []);
+
+  const handleNewChat = React.useCallback(async () => {
+    try {
+      const response = await fetch("/api/conversations", {
+        method: "POST",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const newConversation = data.conversation;
+
+        // Add new conversation to the list
+        setConversations((prev) => [newConversation, ...prev]);
+
+        // Navigate to the new conversation
+        router.push(`/chat/${newConversation.id}`);
+      } else {
+        console.error("Failed to create new conversation");
+      }
+    } catch (error) {
+      console.error("Error creating new conversation:", error);
+    }
+  }, [router]);
+
+  const handleConversationClick = React.useCallback(
+    (conversationId: string) => {
+      if (conversationId !== currentConversationId) {
+        router.push(`/chat/${conversationId}`);
+      }
+    },
+    [router, currentConversationId]
+  );
+
+  if (isLoading) {
+    return (
+      <SidebarContent className="gap-2 p-2">
+        <Button
+          className="w-full mb-2 flex items-center gap-2"
+          variant="outline"
+          disabled
+        >
+          <PlusIcon className="size-4" />
+          <span>New Chat</span>
+        </Button>
+        <div className="flex items-center justify-center py-4">
+          <div className="animate-pulse text-muted-foreground text-sm">
+            Loading conversations...
+          </div>
+        </div>
+      </SidebarContent>
+    );
+  }
 
   return (
     <SidebarContent className="gap-2 p-2">
@@ -55,14 +116,33 @@ export const History = React.memo(function History() {
         <span>New Chat</span>
       </Button>
       <SidebarMenu>
-        {conversations.map((conv) => (
-          <SidebarMenuItem key={conv.id}>
-            <SidebarMenuButton className="flex items-center gap-2 w-full">
-              <MessageSquareIcon className="size-4 text-muted-foreground" />
-              <span className="truncate">{conv.title}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        ))}
+        {conversations.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <MessageSquareIcon className="size-8 text-muted-foreground mb-2" />
+            <p className="text-sm text-muted-foreground">
+              No conversations yet
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Start a new chat to begin
+            </p>
+          </div>
+        ) : (
+          conversations.map((conv) => (
+            <SidebarMenuItem key={conv.id}>
+              <SidebarMenuButton
+                className={`flex items-center gap-2 w-full ${
+                  conv.id === currentConversationId
+                    ? "bg-accent text-accent-foreground"
+                    : ""
+                }`}
+                onClick={() => handleConversationClick(conv.id)}
+              >
+                <MessageSquareIcon className="size-4 text-muted-foreground" />
+                <span className="truncate">{conv.title}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))
+        )}
       </SidebarMenu>
     </SidebarContent>
   );

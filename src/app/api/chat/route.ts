@@ -5,15 +5,28 @@ import { movieAgent } from "@/lib/mastra";
 const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
-  const { message } = await req.json();
-  if (!message) {
-    return NextResponse.json({ error: "Message is required" }, { status: 400 });
+  const { message, conversationId } = await req.json();
+  if (!message || !conversationId) {
+    return NextResponse.json(
+      {
+        error: "Message and conversationId are required",
+      },
+      { status: 400 }
+    );
   }
 
-  // Get or create the single conversation
-  let conversation = await prisma.conversation.findFirst({});
+  // Verify conversation exists
+  const conversation = await prisma.conversation.findUnique({
+    where: { id: conversationId },
+  });
+
   if (!conversation) {
-    conversation = await prisma.conversation.create({ data: {} });
+    return NextResponse.json(
+      {
+        error: "Conversation not found",
+      },
+      { status: 404 }
+    );
   }
 
   // Store user message
@@ -21,7 +34,7 @@ export async function POST(req: NextRequest) {
     data: {
       role: "user",
       content: message,
-      conversationId: conversation.id,
+      conversationId: conversationId,
     },
   });
 
@@ -56,32 +69,50 @@ I'm having trouble connecting to the movie database right now.
     data: {
       role: "agent",
       content: agentResponse,
-      conversationId: conversation.id,
+      conversationId: conversationId,
     },
   });
 
   // Return all messages in the conversation
   const messages = await prisma.message.findMany({
-    where: { conversationId: conversation.id },
+    where: { conversationId: conversationId },
     orderBy: { createdAt: "asc" },
   });
 
   return NextResponse.json({ messages });
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    // Get the single conversation
-    const conversation = await prisma.conversation.findFirst({});
+    const { searchParams } = new URL(req.url);
+    const conversationId = searchParams.get("conversationId");
+
+    if (!conversationId) {
+      return NextResponse.json(
+        {
+          error: "conversationId is required",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Verify conversation exists
+    const conversation = await prisma.conversation.findUnique({
+      where: { id: conversationId },
+    });
 
     if (!conversation) {
-      // No conversation exists yet, return empty array
-      return NextResponse.json({ messages: [] });
+      return NextResponse.json(
+        {
+          error: "Conversation not found",
+        },
+        { status: 404 }
+      );
     }
 
     // Return all messages in the conversation
     const messages = await prisma.message.findMany({
-      where: { conversationId: conversation.id },
+      where: { conversationId: conversationId },
       orderBy: { createdAt: "asc" },
     });
 
