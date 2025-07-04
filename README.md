@@ -1,8 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎬 Movie Chat Application
 
-## Getting Started
+This is a [Next.js](https://nextjs.org) movie recommendation chat application that uses AI to help users discover movies based on their preferences.
 
-First, run the development server:
+## 🐋 Quick Start with Docker (Recommended)
+
+The easiest way to run this application is with Docker Compose:
+
+1. **Set up environment variables:**
+
+   ```bash
+   make setup  # Creates .env file
+   # Edit .env and add your OpenAI API key
+   ```
+
+2. **Start the application:**
+   ```bash
+   docker compose up
+   ```
+
+That's it! 🚀 The application will be available at http://localhost:3000
+
+📖 **For detailed Docker setup instructions, see [DOCKER_SETUP.md](./DOCKER_SETUP.md)**
+
+---
+
+## 💻 Local Development Setup
+
+If you prefer to run the application locally without Docker:
+
+### Prerequisites
+
+- Node.js 20+
+- PostgreSQL database
+- OpenAI API key
+
+### Getting Started
+
+First, install dependencies and run the development server:
 
 ```bash
 npm run dev

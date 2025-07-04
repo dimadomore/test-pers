@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: testpers
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d testpers"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Next.js Application
+  app:
+    build: .
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/testpers
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TMDB_ACCESS_TOKEN=${TMDB_ACCESS_TOKEN:-eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyYTZlMmU5MGFlYjRiZmIyNWIwNjEwMWZlNTZlYzVmZSIsIm5iZiI6MTc1MTU0MDkwNy4zMjgsInN1YiI6IjY4NjY2NGFiYjA2NGEzY2MxZTljMmYyOSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.br3WRLG0Gmyuh6qwvWYWS7KRJt-S_OwjjnUHtTJmH_A}
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./prisma:/app/prisma
+
+volumes:
+  postgres_data:
